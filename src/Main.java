@@ -85,19 +85,36 @@ public class Main {
 
                         httpRequest.setRawHeaders(rawHeaders);
 
-                        starter.handlerFinder(httpRequest.getPath(), httpRequest.getHttpMethod(), httpRequest.getBody());
-
-                        String response = "Teste";
+                        Optional<Object> response = starter.handlerFinder(httpRequest);
 
                         LocalDateTime now = LocalDateTime.now();
 
-                        out.write("HTTP/1.0 200 OK\r\n");
-                        out.write("Date: " + now + "\r\n");
-                        out.write("Server: Custom Server\r\n");
-                        out.write("Content-Type: text/plain\r\n");
-                        out.write("Content-Length: " + response.length() + "\r\n");
-                        out.write("\r\n");
-                        out.write(response);
+                        if (response.isPresent()){
+
+                            Object responseFinal = response.get();
+
+                            String reponseString = responseFinal.toString();
+
+                            out.write("HTTP/1.0 200 OK\r\n");
+                            out.write("Date: " + now + "\r\n");
+                            out.write("Server: Custom Server\r\n");
+                            out.write("Content-Type: text/plain\r\n");
+                            out.write("Content-Length: " + reponseString.length() + "\r\n");
+                            out.write("\r\n");
+                            out.write(reponseString);
+                        }else {
+
+                            out.write("HTTP/1.0 200 OK\r\n");
+                            out.write("Date: " + now + "\r\n");
+                            out.write("Server: Custom Server\r\n");
+                            out.write("\r\n");
+
+                        }
+
+
+
+
+
 
 
 

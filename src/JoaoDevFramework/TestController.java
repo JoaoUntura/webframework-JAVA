@@ -1,23 +1,27 @@
 package JoaoDevFramework;
 
-import JoaoDevFramework.annotations.Body;
-import JoaoDevFramework.annotations.Controller;
-import JoaoDevFramework.annotations.GetMapping;
-import JoaoDevFramework.annotations.PostMapping;
+import JoaoDevFramework.annotations.*;
+import entities.HttpRequest;
 
+//This is not Spring boot
 @Controller(path = "/teste")
 public class TestController {
 
     @GetMapping
     public void getTest(){
-        System.out.println("Achouuu");
+        System.out.println("GetResponse normal");
+    }
+
+    @GetMapping(path = "/caminho")
+    public void getTestParams(){
+        System.out.println("GetResponse caminho adicional");
     }
 
     @PostMapping
-    public void postTest(@Body String body){
+    public String postTest(@Body String body, @Request HttpRequest httpRequest){
 
+        return body;
 
-        System.out.println("Achouuu Post" + body);
     }
 
 }

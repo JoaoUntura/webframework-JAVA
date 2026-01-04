@@ -1,20 +1,23 @@
 package JoaoDevFramework;
 
-import JoaoDevFramework.annotations.Body;
-import JoaoDevFramework.annotations.Controller;
-import JoaoDevFramework.annotations.GetMapping;
-import JoaoDevFramework.annotations.PostMapping;
+import JoaoDevFramework.annotations.*;
 import JoaoDevFramework.classes.ObjectMethodBind;
+import JoaoDevFramework.classes.ParameterBind;
 import entities.HttpMethod;
+import entities.HttpRequest;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class Starter {
 
         private Map<String, ObjectMethodBind> appMap = new HashMap<>();
+        private final Set<Class<?>> frameworkAnnotations = new HashSet<>(Set.of(Body.class, Request.class));
+
 
 
         public Starter(Set<Object> controllers){
@@ -31,21 +34,43 @@ public class Starter {
 
                 Method[] methods = controllerClass.getDeclaredMethods();
 
+
                 for (Method method:methods){
+
+                    String routeKey = null;
 
                     if(method.isAnnotationPresent(GetMapping.class)){
 
-                        String routeKey = path + "-" + HttpMethod.GET;
-                        appMap.put(routeKey, new ObjectMethodBind(object, method));
+                        GetMapping get = method.getAnnotation(GetMapping.class);
+
+                        routeKey = path + get.path() + "-" + HttpMethod.GET;
 
                     } else if (method.isAnnotationPresent(PostMapping.class)) {
 
-                        String routeKey = path + "-" + HttpMethod.POST;
-
-                        appMap.put(routeKey, new ObjectMethodBind(object, method));
+                        routeKey = path + "-" + HttpMethod.POST;
 
                     }
 
+                    Parameter[] parameters = method.getParameters();
+
+                    List<ParameterBind> parameterList = new ArrayList<>();
+
+                    //Somente parametros anotados entram na lista
+                    for (int i = 0; i < parameters.length; i ++){
+                        Parameter parameter = parameters[i];
+                        Annotation[] annotations = parameter.getAnnotations();
+
+                        for(Annotation annotation:annotations){
+
+                            ParameterBind parameterBind = new ParameterBind(parameter.getType(), i, annotation);
+                            parameterList.add(parameterBind);
+                            break;
+
+                        }
+                    }
+
+
+                    appMap.put(routeKey, new ObjectMethodBind(object, method, parameterList));
 
                 }
 
@@ -53,7 +78,11 @@ public class Starter {
 
         }
 
-        public void handlerFinder(String path, HttpMethod method, String requestBody)  {
+        public Optional<Object> handlerFinder(HttpRequest httpRequest)  {
+
+            String path = httpRequest.getPath();
+            HttpMethod method = httpRequest.getHttpMethod();
+
             String routeKey =  path + "-" + method;
 
             try{
@@ -61,34 +90,47 @@ public class Starter {
 
                 if(objectMethodBind == null) {
                     System.out.println("Handler nao encontrado");
-                    return;
+                    return Optional.empty();
                 }
 
                 Method handler = objectMethodBind.getMethod();
                 Object object = objectMethodBind.getObject();
+                List<ParameterBind> parameterBindList = objectMethodBind.getParameterList();
 
-                if(requestBody == null){
-                    handler.invoke(object);
-                    return;
-                }
+                List<Object> parametersInjected = new ArrayList<>();
 
-                Parameter[] parameters = handler.getParameters();
+                for(ParameterBind parameterBind:parameterBindList){
 
-                for (Parameter parameter:parameters){
+                    if(parameterBind.getAnnotationObject() instanceof Body){
 
-                    if(parameter.isAnnotationPresent(Body.class)){
+                        Type parameterType = parameterBind.getType();
+                        Body bodyAnnotatio  = (Body) parameterBind.getAnnotationObject();
 
-                        handler.invoke(object, requestBody);
-                        return;
+                        parametersInjected.add(httpRequest.getBody());
+                        continue;
 
                     }
 
+                    if (parameterBind.getAnnotationObject() instanceof Request){
+                        Type parameterType = parameterBind.getType();
+
+
+                        parametersInjected.add(httpRequest);
+                        continue;
+                    }
+
+                    parametersInjected.add(null);
+
                 }
 
+                Object response = handler.invoke(object, parametersInjected.toArray());
+                return Optional.ofNullable(response);
 
             }catch (Exception e){
                 System.out.println(e);
             }
+
+            return Optional.empty();
 
 
         }
