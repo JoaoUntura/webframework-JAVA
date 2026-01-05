@@ -1,9 +1,7 @@
-package JoaoDevFramework.classes;
+package JoaoDevFramework.entities;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
-import java.util.Map;
 
 public class ObjectMethodBind {
 

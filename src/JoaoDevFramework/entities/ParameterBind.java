@@ -1,24 +1,22 @@
-package JoaoDevFramework.classes;
-
-import java.lang.reflect.Type;
+package JoaoDevFramework.entities;
 
 public class ParameterBind {
 
-    private Type type;
+    private Class<?> type;
     private Integer position;
     private Object annotationObject;
 
-    public ParameterBind(Type type, Integer position, Object annotationObject) {
+    public ParameterBind(Class<?> type, Integer position, Object annotationObject) {
         this.type = type;
         this.position = position;
         this.annotationObject = annotationObject;
     }
 
-    public Type getType() {
+    public Class<?> getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(Class<?> type) {
         this.type = type;
     }
 

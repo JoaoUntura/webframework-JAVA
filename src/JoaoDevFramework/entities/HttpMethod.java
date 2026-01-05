@@ -1,4 +1,4 @@
-package entities;
+package JoaoDevFramework.entities;
 
 public enum HttpMethod {
 

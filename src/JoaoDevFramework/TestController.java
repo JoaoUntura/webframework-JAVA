@@ -1,15 +1,19 @@
 package JoaoDevFramework;
 
 import JoaoDevFramework.annotations.*;
-import entities.HttpRequest;
+import JoaoDevFramework.entities.HttpStatus;
+import JoaoDevFramework.entities.Response;
+import JoaoDevFramework.entities.User;
+import JoaoDevFramework.entities.HttpRequest;
 
 //This is not Spring boot
 @Controller(path = "/teste")
 public class TestController {
 
     @GetMapping
-    public void getTest(){
-        System.out.println("GetResponse normal");
+    public Response getTest(){
+
+        return Response.status(HttpStatus.OK).body("Ola");
     }
 
     @GetMapping(path = "/caminho")
@@ -18,9 +22,9 @@ public class TestController {
     }
 
     @PostMapping
-    public String postTest(@Body String body, @Request HttpRequest httpRequest){
+    public Response postTest(@Body User user, @Request HttpRequest httpRequest){
 
-        return body;
+        return Response.status(HttpStatus.CREATED).body(user);
 
     }
 

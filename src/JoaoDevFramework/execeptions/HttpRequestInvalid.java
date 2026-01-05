@@ -1,4 +1,4 @@
-package execeptions;
+package JoaoDevFramework.execeptions;
 
 public class HttpRequestInvalid extends RuntimeException {
     public HttpRequestInvalid(String message) {

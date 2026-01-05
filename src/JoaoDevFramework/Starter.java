@@ -1,22 +1,19 @@
 package JoaoDevFramework;
 
 import JoaoDevFramework.annotations.*;
-import JoaoDevFramework.classes.ObjectMethodBind;
-import JoaoDevFramework.classes.ParameterBind;
-import entities.HttpMethod;
-import entities.HttpRequest;
+import JoaoDevFramework.entities.ObjectMethodBind;
+import JoaoDevFramework.entities.ParameterBind;
+import JoaoDevFramework.entities.HttpMethod;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class Starter {
 
         private Map<String, ObjectMethodBind> appMap = new HashMap<>();
-        private final Set<Class<?>> frameworkAnnotations = new HashSet<>(Set.of(Body.class, Request.class));
+
 
 
 
@@ -78,67 +75,16 @@ public class Starter {
 
         }
 
-        public Optional<Object> handlerFinder(HttpRequest httpRequest)  {
 
-            String path = httpRequest.getPath();
-            HttpMethod method = httpRequest.getHttpMethod();
-
-            String routeKey =  path + "-" + method;
-
-            try{
-                ObjectMethodBind objectMethodBind = appMap.get(routeKey);
-
-                if(objectMethodBind == null) {
-                    System.out.println("Handler nao encontrado");
-                    return Optional.empty();
-                }
-
-                Method handler = objectMethodBind.getMethod();
-                Object object = objectMethodBind.getObject();
-                List<ParameterBind> parameterBindList = objectMethodBind.getParameterList();
-
-                List<Object> parametersInjected = new ArrayList<>();
-
-                for(ParameterBind parameterBind:parameterBindList){
-
-                    if(parameterBind.getAnnotationObject() instanceof Body){
-
-                        Type parameterType = parameterBind.getType();
-                        Body bodyAnnotatio  = (Body) parameterBind.getAnnotationObject();
-
-                        parametersInjected.add(httpRequest.getBody());
-                        continue;
-
-                    }
-
-                    if (parameterBind.getAnnotationObject() instanceof Request){
-                        Type parameterType = parameterBind.getType();
-
-
-                        parametersInjected.add(httpRequest);
-                        continue;
-                    }
-
-                    parametersInjected.add(null);
-
-                }
-
-                Object response = handler.invoke(object, parametersInjected.toArray());
-                return Optional.ofNullable(response);
-
-            }catch (Exception e){
-                System.out.println(e);
-            }
-
-            return Optional.empty();
-
-
-        }
 
     @Override
     public String toString() {
         return "Starter{" +
                 "appMap=" + appMap.toString() +
                 '}';
+    }
+
+    public Map<String, ObjectMethodBind> getAppMap() {
+        return appMap;
     }
 }
