@@ -2,10 +2,7 @@ package JoaoDevFramework.classes;
 
 import JoaoDevFramework.annotations.Body;
 import JoaoDevFramework.annotations.Request;
-import JoaoDevFramework.entities.HttpMethod;
-import JoaoDevFramework.entities.HttpRequest;
-import JoaoDevFramework.entities.ObjectMethodBind;
-import JoaoDevFramework.entities.ParameterBind;
+import JoaoDevFramework.entities.*;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -21,7 +18,7 @@ public class HttpHandler {
         this.appMap = appMap;
     }
 
-    public Optional<Object> handlerFinder(HttpRequest httpRequest)  {
+    public Optional<Response> handlerFinder(HttpRequest httpRequest)  {
 
         String path = httpRequest.getPath();
         HttpMethod method = httpRequest.getHttpMethod();
@@ -68,7 +65,7 @@ public class HttpHandler {
 
             }
 
-            Object response = handler.invoke(object, parametersInjected.toArray());
+            Response response = (Response) handler.invoke(object, parametersInjected.toArray());
             return Optional.ofNullable(response);
 
         }catch (Exception e){

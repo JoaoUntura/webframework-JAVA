@@ -21,10 +21,9 @@ public class JsonSerializer {
         convertMap.put(Boolean.class, Boolean::valueOf);
     }
 
-    public Object serialize(Class<?> targetClass, String content) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public Object serialize(Class<?> targetClass, String json) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 
-        List<String> jsonKeyValues = List.of(content.split(","));
-
+        //Nome e tipo dos campos da classe a serem injetados
         Map<String, Class<?>> fieldsNameTypeMap = new HashMap<>();
 
         for(Field field:targetClass.getDeclaredFields()){
@@ -33,28 +32,25 @@ public class JsonSerializer {
 
         }
 
-        Map<String, Object> jsonFields = new HashMap<>();
-        for(String jsonKeyValue:jsonKeyValues){
+        //Conversao de json para HashMap
+        Map<String, String> jsonMap = mapJson(json);
 
-            List<String> keyValue = Arrays.stream(jsonKeyValue.trim().split(":")).map(s -> {
-               return s.trim().replaceAll("[\"{}]", "");
-            }).toList();
 
-            String key = keyValue.get(0);
-
-            String value = keyValue.get(1);
-
-            //Check se o campo do Json corresponde a algum campo do objeto
+        //Check se o campo do Json corresponde a algum campo do objeto
+        Map<String, Object> typedJsonMap = new HashMap<>();
+        for (String key: jsonMap.keySet()){
+            String value = jsonMap.get(key);
             Class<?> fieldType = fieldsNameTypeMap.get(key);
             if(fieldType != null){
 
                 Object convertedField = objectToType(fieldType, value);
 
-                jsonFields.put(key,convertedField);
+                typedJsonMap.put(key,convertedField);
             }
         }
 
 
+        //Injecao dos valores via metodos Set
         Method[] methods = targetClass.getDeclaredMethods();
         Object object = targetClass.getConstructor().newInstance();
 
@@ -66,8 +62,7 @@ public class JsonSerializer {
                 //setFirstName -> firstname
                 String fieldName = methodName.replaceFirst("set", "").toLowerCase();
 
-                Object value = jsonFields.get(fieldName);
-
+                Object value = typedJsonMap.get(fieldName);
 
                 method.invoke(object, value);
 
@@ -78,10 +73,85 @@ public class JsonSerializer {
         return object;
     }
 
+    public Map<String, String> mapJson(String json) throws RuntimeException{
+
+        Map<String, String> jsonMap = new HashMap<>();
+
+        try{
+
+            char[] characters = json.toCharArray();
+            boolean start = false;
+
+            StringBuilder buffer = new StringBuilder();
+
+            String lastKey = null;
+
+            boolean readingString = false;
+            boolean isValue = false;
+            for (char c : characters) {
+                if (c == '{' && !start) {
+                    start = true;
+                    continue;
+                }
+
+                //Transicao entre key-values
+                if ((c == ',' || c == '}') && isValue) {
+
+                    String value = buffer.toString();
+                    buffer.delete(0, buffer.length());
+
+                    jsonMap.put(lastKey,value);
+                    isValue = false;
+                    lastKey = null;
+                    continue;
+
+                }
+
+                if (c == '"' && !readingString) {
+                    readingString = true;
+                    continue;
+                }
+
+                if (Character.isWhitespace(c) && !readingString) continue;
+
+                //Transicao de key pra value
+                if (c == ':'){
+
+                    String key = buffer.toString();
+
+                    buffer.delete(0, buffer.length());
+
+                    jsonMap.put(key, null);
+                    lastKey = key;
+                    isValue = true;
+                    continue;
+
+                }
+
+                if (c == '"' && readingString) {
+                    readingString = false;
+                    continue;
+                }
+
+                buffer.append(c);
+
+            }
+
+
+
+
+
+
+        }catch (Exception e){
+            System.out.println(e);
+            throw new RuntimeException("Invalid Json Body");
+        }
+
+        return jsonMap;
+
+    }
+
     public Object objectToType(Class<?> type, String object){
-
-
-
 
         Function<String, Object> function = convertMap.get(type);
 
