@@ -2,6 +2,7 @@ package JoaoDevFramework.classes;
 
 import JoaoDevFramework.entities.HttpMethod;
 import JoaoDevFramework.entities.HttpRequest;
+import JoaoDevFramework.entities.HttpResponse;
 import JoaoDevFramework.entities.Response;
 
 import java.io.*;
@@ -81,7 +82,6 @@ public class HttpServer {
 
                 }
 
-
                 String[] headerValue = line.split(": ");
 
                 String key = headerValue[0];
@@ -97,29 +97,11 @@ public class HttpServer {
 
             Optional<Object> response = httpHandler.handlerFinder(httpRequest);
 
-            LocalDateTime now = LocalDateTime.now();
-
-            if (response.isPresent() && response.get() instanceof  Response){
-                Response responseObject = (Response) response.get();
-
-                out.write(String.format("HTTP/1.0 %s OK\r\n", responseObject.getHttpStatus()));
-                out.write("Date: " + now + "\r\n");
-                out.write("Server: Custom Server\r\n");
-                out.write("Content-Type: text/plain\r\n");
-                out.write("Content-Length: " + 2 + "\r\n");
-                out.write("\r\n");
-                out.write("Ok");
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setResponseBody("Ola");
+            out.write(httpResponse.constructHttpResponse());
 
 
-
-            }else {
-
-                out.write("HTTP/1.0 200 OK\r\n");
-                out.write("Date: " + now + "\r\n");
-                out.write("Server: Custom Server\r\n");
-                out.write("\r\n");
-
-            }
 
         } catch (IOException e) {
             throw new RuntimeException(e);

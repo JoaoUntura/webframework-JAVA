@@ -6,7 +6,7 @@ public class Response{
     private Object body;
 
     public Response(HttpStatus httpStatus){
-        this.httpStatus = httpStatus.getStatus();
+        this.httpStatus = httpStatus.getStatusCode();
     }
 
     public Response body(Object body){

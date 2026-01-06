@@ -11,7 +11,7 @@ public enum HttpStatus {
         this.status = status;
     }
 
-    public Integer getStatus(){
+    public Integer getStatusCode(){
         return this.status;
     }
 
