@@ -2,11 +2,11 @@ package JoaoDevFramework.entities;
 
 public class Response{
 
-    private Integer httpStatus;
+    private HttpStatus httpStatus;
     private Object body;
 
     public Response(HttpStatus httpStatus){
-        this.httpStatus = httpStatus.getStatusCode();
+        this.httpStatus = httpStatus;
     }
 
     public Response body(Object body){
@@ -20,11 +20,11 @@ public class Response{
     }
 
 
-    public Integer getHttpStatus() {
+    public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 
-    public void setHttpStatus(Integer httpStatus) {
+    public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 

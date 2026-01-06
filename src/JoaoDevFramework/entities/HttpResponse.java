@@ -1,5 +1,7 @@
 package JoaoDevFramework.entities;
 
+import JoaoDevFramework.classes.JsonDeserializer;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,12 +11,27 @@ public class HttpResponse {
     private HttpStatus status = HttpStatus.OK;
     private Map<Class<?>, String> contentTypes = new HashMap<>();
     private Map<String, String> responseHeaders = new HashMap<>(Map.of("Server", "Custom Server"));
+    private JsonDeserializer jsonDeserializer = new JsonDeserializer();
 
-    private String responseBody;
+    private String responseBody = "";
+
+    public HttpResponse(Response response) {
+
+        if (response != null){
+
+            if (response.getHttpStatus() != null) status = response.getHttpStatus();
+            if(response.getBody() != null){
+
+                setResponseBody(jsonDeserializer.deserializeObject(response.getBody()));
+            }
+
+        }
+
+    }
 
     public void setResponseBody(String responseBody){
             this.responseBody = responseBody;
-            responseHeaders.put("Content-Type", "text/plain");
+            responseHeaders.put("Content-Type", "application/json");
             Integer byteSize =  responseBody.getBytes(StandardCharsets.UTF_8).length;
             responseHeaders.put("Content-Length", String.valueOf(byteSize));
 

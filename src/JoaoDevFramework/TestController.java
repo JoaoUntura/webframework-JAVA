@@ -24,6 +24,8 @@ public class TestController {
     @PostMapping
     public Response postTest(@Body User user, @Request HttpRequest httpRequest){
 
+        user.setName("Nome Alterado no Server");
+
         return Response.status(HttpStatus.CREATED).body(user);
 
     }
