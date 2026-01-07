@@ -17,15 +17,17 @@ public class HttpResponse {
 
     public HttpResponse(Response response) {
 
-        if (response != null){
+        status = response.getHttpStatus();
+        if(response.getBody() != null){
+            if (response.getBody() instanceof String) {
+                setResponseBody(response.getBody().toString());
 
-            if (response.getHttpStatus() != null) status = response.getHttpStatus();
-            if(response.getBody() != null){
-
+            }else{
                 setResponseBody(jsonDeserializer.deserializeObject(response.getBody()));
             }
-
         }
+
+
 
     }
 
@@ -34,8 +36,6 @@ public class HttpResponse {
             responseHeaders.put("Content-Type", "application/json");
             Integer byteSize =  responseBody.getBytes(StandardCharsets.UTF_8).length;
             responseHeaders.put("Content-Length", String.valueOf(byteSize));
-
-
     }
 
 

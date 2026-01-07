@@ -11,7 +11,7 @@ public class JsonDeserializer {
     Logger logger = Logger.getGlobal();
 
     public String deserializeObject(Object object)  {
-
+        System.out.println(object.toString());
 
         StringBuilder jsonString = new StringBuilder("{");
         Field[] fields = object.getClass().getDeclaredFields();

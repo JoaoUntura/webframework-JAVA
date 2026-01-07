@@ -4,6 +4,7 @@ import JoaoDevFramework.annotations.Body;
 import JoaoDevFramework.annotations.Request;
 import JoaoDevFramework.entities.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -18,62 +19,57 @@ public class HttpHandler {
         this.appMap = appMap;
     }
 
-    public Optional<Response> handlerFinder(HttpRequest httpRequest)  {
+    public Response handlerFinder(HttpRequest httpRequest) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
 
         String path = httpRequest.getPath();
         HttpMethod method = httpRequest.getHttpMethod();
 
         String routeKey =  path + "-" + method;
 
-        try{
-            ObjectMethodBind objectMethodBind = appMap.get(routeKey);
+        ObjectMethodBind objectMethodBind = appMap.get(routeKey);
 
-            if(objectMethodBind == null) {
-                System.out.println("Handler nao encontrado");
-                return Optional.empty();
-            }
+        if(objectMethodBind == null) return Response.status(HttpStatus.NOT_FOUND);
 
-            Method handler = objectMethodBind.getMethod();
-            Object object = objectMethodBind.getObject();
-            List<ParameterBind> parameterBindList = objectMethodBind.getParameterList();
+        Method handler = objectMethodBind.getMethod();
+        Object object = objectMethodBind.getObject();
+        List<ParameterBind> parameterBindList = objectMethodBind.getParameterList();
 
-            List<Object> parametersInjected = new ArrayList<>();
+        List<Object> parametersInjected = new ArrayList<>();
 
-            for(ParameterBind parameterBind:parameterBindList){
+        for(ParameterBind parameterBind:parameterBindList){
 
-                if(parameterBind.getAnnotationObject() instanceof Body){
+            if(parameterBind.getAnnotationObject() instanceof Body){
 
-                    Class<?> parameterType = parameterBind.getType();
+                Class<?> parameterType = parameterBind.getType();
 
-                    String body = httpRequest.getBody();
+                String body = httpRequest.getBody();
 
-                    if(body == null || body.isEmpty()) continue;
+                if(body == null || body.isEmpty()) continue;
 
-                    Object serializedBody = jsonSerializer.serialize(parameterType, httpRequest.getBody());
+                Object serializedBody = jsonSerializer.serialize(parameterType, httpRequest.getBody());
 
-                    parametersInjected.add(serializedBody);
-                    continue;
-
-                }
-
-                if (parameterBind.getAnnotationObject() instanceof Request){
-                    parametersInjected.add(httpRequest);
-                    continue;
-                }
-
-                parametersInjected.add(null);
+                parametersInjected.add(serializedBody);
+                continue;
 
             }
 
-            Response response = (Response) handler.invoke(object, parametersInjected.toArray());
-            return Optional.ofNullable(response);
+            if (parameterBind.getAnnotationObject() instanceof Request){
+                parametersInjected.add(httpRequest);
+                continue;
+            }
 
-        }catch (Exception e){
-            System.out.println(e);
+            parametersInjected.add(null);
+
         }
 
-        return Optional.empty();
+        Response response = (Response) handler.invoke(object, parametersInjected.toArray());
 
+        if(response == null){
+            response = Response.status(HttpStatus.OK);
+        }
+
+
+        return response;
 
     }
 }
