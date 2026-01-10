@@ -1,15 +1,11 @@
 import JoaoDevFramework.Starter;
 import JoaoDevFramework.TestController;
-import JoaoDevFramework.classes.HttpHandler;
+import JoaoDevFramework.classes.HttpHandlerFinder;
 import JoaoDevFramework.classes.HttpServer;
-import JoaoDevFramework.entities.HttpMethod;
-import JoaoDevFramework.entities.HttpRequest;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,9 +17,9 @@ public class Main {
         Set<Object> objects = new HashSet<>();
         objects.add(new TestController());
         Starter starter = new Starter(objects);
-        HttpHandler httpHandler = new HttpHandler(starter.getAppMap());
+        HttpHandlerFinder httpHandlerFinder = new HttpHandlerFinder(starter.getAppMap());
 
-        HttpServer httpServer = new HttpServer(httpHandler);
+        HttpServer httpServer = new HttpServer(httpHandlerFinder);
         try(ServerSocket serverSocket = new ServerSocket(8080)){
             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
                 while(true) {

@@ -1,7 +1,7 @@
 package JoaoDevFramework;
 
 import JoaoDevFramework.annotations.*;
-import JoaoDevFramework.entities.ObjectMethodBind;
+import JoaoDevFramework.entities.Handler;
 import JoaoDevFramework.entities.ParameterBind;
 import JoaoDevFramework.entities.HttpMethod;
 
@@ -12,70 +12,106 @@ import java.util.*;
 
 public class Starter {
 
-        private Map<String, ObjectMethodBind> appMap = new HashMap<>();
+        private Map<String, List<Handler>> appMap = new HashMap<>();
 
 
+        public Starter(Set<Object> controllersObjects){
 
+            for(Object controllerObject : controllersObjects){
 
-        public Starter(Set<Object> controllers){
+                List<Handler> controllerHandlerList = new ArrayList<>();
 
-            for(Object object : controllers){
-
-                Class<?>  controllerClass = object.getClass();
+                //Controller
+                Class<?> controllerClass = controllerObject.getClass();
 
                 if(!controllerClass.isAnnotationPresent(Controller.class)) continue;
 
                 Controller controller = controllerClass.getAnnotation(Controller.class);
 
-                String path = controller.path();
+                //Map key
+                String path = controller.path().replaceFirst("/", "");
 
+                //Handler objects
                 Method[] methods = controllerClass.getDeclaredMethods();
-
 
                 for (Method method:methods){
 
-                    String routeKey = null;
+                    Handler handler = new Handler(controllerObject, method);
 
-                    if(method.isAnnotationPresent(GetMapping.class)){
+                    //Processando anotações de metodo
+                    String annotationPath = "";
+                    if (method.isAnnotationPresent(GetMapping.class)){
 
                         GetMapping get = method.getAnnotation(GetMapping.class);
-
-                        routeKey = path + get.path() + "-" + HttpMethod.GET;
+                        annotationPath = get.path();
+                        handler.setHttpMethod(HttpMethod.GET);
 
                     } else if (method.isAnnotationPresent(PostMapping.class)) {
 
-                        routeKey = path + "-" + HttpMethod.POST;
+                        PostMapping postMapping = method.getAnnotation(PostMapping.class);
+                        annotationPath = postMapping.path();
+                        handler.setHttpMethod(HttpMethod.POST);
 
                     }
+
+                    if(annotationPath.startsWith("/")){
+                        annotationPath = annotationPath.replaceFirst("/", "");
+                    }
+
+                    Map<Integer, String> pathMap = new HashMap<>();
+                    List<String> paths = new ArrayList<>(List.of(annotationPath.split("/")));
+
+                    for (int i = 0; i< paths.size(); i ++){
+
+                        Integer pathPosition = i;
+                        String subPath = paths.get(pathPosition);
+
+                        if(!subPath.isEmpty()){
+                            pathMap.put(pathPosition, subPath);
+                        }
+
+                    }
+
+                    handler.setPathMap(pathMap);
 
                     Parameter[] parameters = method.getParameters();
 
-                    List<ParameterBind> parameterList = new ArrayList<>();
+                    List<ParameterBind> parameterList = bindParameters(parameters);
 
-                    //Somente parametros anotados entram na lista
-                    for (int i = 0; i < parameters.length; i ++){
-                        Parameter parameter = parameters[i];
-                        Annotation[] annotations = parameter.getAnnotations();
+                    handler.setParameterList(parameterList);
 
-                        for(Annotation annotation:annotations){
+                    controllerHandlerList.add(handler);
 
-                            ParameterBind parameterBind = new ParameterBind(parameter.getType(), i, annotation);
-                            parameterList.add(parameterBind);
-                            break;
-
-                        }
-                    }
-
-
-                    appMap.put(routeKey, new ObjectMethodBind(object, method, parameterList));
 
                 }
+
+                appMap.put(path, controllerHandlerList);
 
             }
 
         }
 
 
+    private List<ParameterBind> bindParameters(Parameter[] parameters){
+
+        List<ParameterBind> parameterList = new ArrayList<>();
+
+        for (int parameterPos = 0; parameterPos < parameters.length; parameterPos ++){
+            Parameter parameter = parameters[parameterPos];
+            Annotation[] annotations = parameter.getAnnotations();
+
+            //Pegando apenas primeira anotação, refatorar depois
+            if(annotations.length > 0){
+                Annotation annotation = annotations[0];
+                ParameterBind parameterBind = new ParameterBind(parameter.getType(), parameterPos, annotation);
+                parameterList.add(parameterBind);
+            }
+
+
+        }
+
+        return parameterList;
+    }
 
     @Override
     public String toString() {
@@ -84,7 +120,7 @@ public class Starter {
                 '}';
     }
 
-    public Map<String, ObjectMethodBind> getAppMap() {
+    public Map<String, List<Handler>> getAppMap() {
         return appMap;
     }
 }

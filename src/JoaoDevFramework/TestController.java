@@ -16,9 +16,24 @@ public class TestController {
         return Response.status(HttpStatus.OK).body("Ola");
     }
 
-    @GetMapping(path = "/caminho")
-    public void getTestParams(){
-        System.out.println("GetResponse caminho adicional");
+    @GetMapping(path = "/{id}")
+    public Response getTestId(@PathVariable(name = "id") Float id){
+        System.out.println(id);
+        return Response.status(HttpStatus.OK).body("Ola");
+    }
+
+    @GetMapping(path = "/{id}/{productId}")
+    public Response getTestIdProductId(@PathVariable(name = "id") Float id, @PathVariable(name = "productId") String idP){
+        System.out.println(id);
+        System.out.println(idP);
+
+        return Response.status(HttpStatus.OK).body("Ola");
+    }
+
+    @GetMapping(path = "/product/{id}")
+    public Response getTestSubpath(){
+
+        return Response.status(HttpStatus.OK).body("Ola");
     }
 
     @PostMapping
