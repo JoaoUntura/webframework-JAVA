@@ -3,26 +3,22 @@ package JoaoDevFramework.classes;
 import JoaoDevFramework.entities.*;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class HttpServer {
 
-    private final HttpHandler httpHandler;
+    private final HttpHandlerFinder httpHandlerFinder;
 
-    public HttpServer(HttpHandler httpHandler) {
-        this.httpHandler = httpHandler;
+    public HttpServer(HttpHandlerFinder httpHandlerFinder) {
+        this.httpHandlerFinder = httpHandlerFinder;
     }
 
     public void connect(Socket cliente) throws IOException {
 
         //Tem que ser refatorado pra InputStream e ler só por byte no futuro
-
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(cliente.getOutputStream()));
@@ -30,7 +26,7 @@ public class HttpServer {
             try{
                 HttpRequest httpRequest = parseHttpRequest(reader);
 
-                Response response = httpHandler.handlerFinder(httpRequest);
+                Response response = httpHandlerFinder.handlerFinder(httpRequest);
 
                 HttpResponse httpResponse = new HttpResponse(response);
 
