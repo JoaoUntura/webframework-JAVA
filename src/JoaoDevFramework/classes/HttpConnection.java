@@ -8,11 +8,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpServer {
+public class HttpConnection {
 
     private final HttpHandlerFinder httpHandlerFinder;
 
-    public HttpServer(HttpHandlerFinder httpHandlerFinder) {
+    public HttpConnection(HttpHandlerFinder httpHandlerFinder) {
         this.httpHandlerFinder = httpHandlerFinder;
     }
 

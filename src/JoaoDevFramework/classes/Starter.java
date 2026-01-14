@@ -1,4 +1,4 @@
-package JoaoDevFramework;
+package JoaoDevFramework.classes;
 
 import JoaoDevFramework.annotations.*;
 import JoaoDevFramework.entities.Handler;
@@ -12,7 +12,7 @@ import java.util.*;
 
 public class Starter {
 
-        private Map<String, List<Handler>> appMap = new HashMap<>();
+        private final Map<String, List<Handler>> appMap = new HashMap<>();
 
 
         public Starter(Set<Object> controllersObjects){
@@ -39,20 +39,22 @@ public class Starter {
                     Handler handler = new Handler(controllerObject, method);
 
                     //Processando anotações de metodo
-                    String annotationPath = "";
+                    StringBuilder annotationPathBuilder = new StringBuilder();
                     if (method.isAnnotationPresent(GetMapping.class)){
 
                         GetMapping get = method.getAnnotation(GetMapping.class);
-                        annotationPath = get.path();
+                        annotationPathBuilder.append(get.path());
                         handler.setHttpMethod(HttpMethod.GET);
 
                     } else if (method.isAnnotationPresent(PostMapping.class)) {
 
                         PostMapping postMapping = method.getAnnotation(PostMapping.class);
-                        annotationPath = postMapping.path();
+                        annotationPathBuilder.append(postMapping.path());
                         handler.setHttpMethod(HttpMethod.POST);
 
                     }
+
+                        String annotationPath = annotationPathBuilder.toString();
 
                     if(annotationPath.startsWith("/")){
                         annotationPath = annotationPath.replaceFirst("/", "");

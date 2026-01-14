@@ -21,7 +21,6 @@ public class HttpResponse {
         if(response.getBody() != null){
             if (response.getBody() instanceof String) {
                 setResponseBody(response.getBody().toString());
-
             }else{
                 setResponseBody(jsonDeserializer.deserializeObject(response.getBody()));
             }
@@ -47,7 +46,7 @@ public class HttpResponse {
         builder.append(String.format(String.format("HTTP/1.0 %s %s\r\n", status.getStatusCode(), status)));
 
         //Headers
-        responseHeaders.keySet().stream().forEach((key) -> {
+        responseHeaders.keySet().forEach((key) -> {
             builder.append(String.format("%s: %s\r\n", key, responseHeaders.get(key)));
         });
         builder.append("\r\n");

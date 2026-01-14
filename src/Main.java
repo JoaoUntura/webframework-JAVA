@@ -1,54 +1,12 @@
-import JoaoDevFramework.Starter;
-import JoaoDevFramework.TestController;
-import JoaoDevFramework.classes.HttpHandlerFinder;
-import JoaoDevFramework.classes.HttpServer;
-
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import JoaoDevFramework.classes.Server;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws IOException {
-        Set<Object> objects = new HashSet<>();
-        objects.add(new TestController());
-        Starter starter = new Starter(objects);
-        HttpHandlerFinder httpHandlerFinder = new HttpHandlerFinder(starter.getAppMap());
+    public static void main(String[] args) {
 
-        HttpServer httpServer = new HttpServer(httpHandlerFinder);
-        try(ServerSocket serverSocket = new ServerSocket(8080)){
-            ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-                while(true) {
-                    Socket cliente = serverSocket.accept();
-
-                    executor.submit(() -> {
-                        try{
-                            httpServer.connect(cliente);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }finally {
-                            if(!cliente.isClosed()){
-                                try {
-                                    cliente.close();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        }
-
-
-                    });
-
-                }
-
-
-        }
-
-
+        Server httpServer = new Server();
+        httpServer.initServer();
 
 
     }

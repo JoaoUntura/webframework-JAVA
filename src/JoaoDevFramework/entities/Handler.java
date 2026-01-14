@@ -6,8 +6,6 @@ import java.util.Map;
 
 public class Handler {
 
-
-
     private Map<Integer, String> pathMap;
 
     private HttpMethod httpMethod;

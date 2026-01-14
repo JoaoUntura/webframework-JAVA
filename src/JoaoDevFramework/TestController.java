@@ -17,8 +17,9 @@ public class TestController {
     }
 
     @GetMapping(path = "/{id}")
-    public Response getTestId(@PathVariable(name = "id") Float id){
+    public Response getTestId(@PathVariable(name = "id") Float id, @QueryParam(name = "filtro") String filtro){
         System.out.println(id);
+        System.out.println(filtro);
         return Response.status(HttpStatus.OK).body("Ola");
     }
 
@@ -26,12 +27,6 @@ public class TestController {
     public Response getTestIdProductId(@PathVariable(name = "id") Float id, @PathVariable(name = "productId") String idP){
         System.out.println(id);
         System.out.println(idP);
-
-        return Response.status(HttpStatus.OK).body("Ola");
-    }
-
-    @GetMapping(path = "/product/{id}")
-    public Response getTestSubpath(){
 
         return Response.status(HttpStatus.OK).body("Ola");
     }

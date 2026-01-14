@@ -23,7 +23,7 @@ public class JsonSerializer {
 
     public Object serialize(Class<?> targetClass, String json) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 
-        //Nome e tipo dos campos da classe a serem injetados
+
         Map<String, Class<?>> fieldsNameTypeMap = new HashMap<>();
 
         for(Field field:targetClass.getDeclaredFields()){
@@ -136,10 +136,6 @@ public class JsonSerializer {
                 buffer.append(c);
 
             }
-
-
-
-
 
 
         }catch (Exception e){
